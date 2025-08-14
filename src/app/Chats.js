@@ -24,7 +24,7 @@ const Chats = () => {
 
     return (
         <>
-            <div className="chats h-screen flex flex-col">
+            <div className="chats h-screen flex flex-col my-20 w-[80%] ml-auto">
                 {/* Messages Area */}
                 <div className="flex-1 p-4 overflow-y-auto bg-gray-100">
                     {messages.map((msg, i) => (
@@ -48,14 +48,14 @@ const Chats = () => {
                 {/* Input Area */}
                 <form
                     onSubmit={sendMessage}
-                    className="fixed bottom-0 left-0 w-full bg-white p-2 border-t border-gray-300 flex items-center"
+                    className="fixed bottom-0 right-0 w-[80%] bg-white p-2 border-t border-gray-300 flex items-center"
                 >
                     <input
                         type="text"
                         value={newMessage}
                         onChange={(e) => setNewMessage(e.target.value)}
                         placeholder="Type your message..."
-                        className="flex-1 p-2 rounded-lg border border-gray-300 focus:outline-none"
+                        className="flex-1 p-2 rounded-lg border border-gray-300  focus:outline-none"
                     />
                     <button
                         type="submit"

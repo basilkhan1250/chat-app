@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 
 function Search() {
     return (
-        <div className="bg-blue-600 w-full h-[70px] flex items-center justify-between px-4">
+        <div className="bg-blue-600 w-full h-[70px] flex items-center justify-between px-4 position: fixed top-0 left-0 z-50">
             <h1 className="text-3xl font-semibold text-white">Wassup</h1>
 
             <div className="flex items-center justify-center shadow-md">

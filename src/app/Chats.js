@@ -4,16 +4,26 @@ import React, { useState } from "react";
 
 const Chats = () => {
 
+    const [messages, setMessages] = useState([
+        { text: "Hey! How are you?", sender: "them" },
+        { text: "I'm good, thanks! And you?", sender: "me" },
+        { text: "I'm great, just working on some projects.", sender: "them" },
+    ])
 
 
+    const [newMessage, setNewMessage] = useState("")
+
+    const sendMessage = (e) => {
+        e.preventDefault()
+        if (!newMessage.trim()) return;
+        setMessages([...messages, { text: newMessage, sender: "me" }])
+        setNewMessage("")
+    }
 
 
 
     return (
         <>
-
-
-
             <div className="chats h-screen flex flex-col">
                 {/* Messages Area */}
                 <div className="flex-1 p-4 overflow-y-auto bg-gray-100">
@@ -25,8 +35,8 @@ const Chats = () => {
                         >
                             <div
                                 className={`max-w-xs px-4 py-2 rounded-lg shadow-md ${msg.sender === "me"
-                                        ? "bg-blue-500 text-white rounded-br-none"
-                                        : "bg-gray-300 text-gray-900 rounded-bl-none"
+                                    ? "bg-blue-500 text-white rounded-br-none"
+                                    : "bg-gray-300 text-gray-900 rounded-bl-none"
                                     }`}
                             >
                                 {msg.text}

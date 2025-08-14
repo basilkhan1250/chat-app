@@ -24,9 +24,9 @@ const Chats = () => {
 
     return (
         <>
-            <div className="chats h-screen flex flex-col my-20 w-[80%] ml-auto">
+            <div className="chats h-[85vh] w-[80%] fixed right-0 flex flex-col  mt-[70px]">
                 {/* Messages Area */}
-                <div className="flex-1 p-4 overflow-y-auto bg-gray-100">
+                <div className="flex-1 p-4 overflow-y-auto bg-gray-500">
                     {messages.map((msg, i) => (
                         <div
                             key={i}
@@ -46,24 +46,26 @@ const Chats = () => {
                 </div>
 
                 {/* Input Area */}
-                <form
-                    onSubmit={sendMessage}
-                    className="fixed bottom-0 right-0 w-[80%] bg-white p-2 border-t border-gray-300 flex items-center"
-                >
-                    <input
-                        type="text"
-                        value={newMessage}
-                        onChange={(e) => setNewMessage(e.target.value)}
-                        placeholder="Type your message..."
-                        className="flex-1 p-2 rounded-lg border border-gray-300  focus:outline-none"
-                    />
-                    <button
-                        type="submit"
-                        className="ml-2 px-4 py-2 bg-blue-500 cursor-pointer text-white rounded-lg hover:bg-blue-600"
+                <div>
+                    <form
+                        onSubmit={sendMessage}
+                        className="fixed bottom-0 right-0 w-[80%] bg-gray-700 p-2 border-t border-gray-500  flex items-center"
                     >
-                        Send
-                    </button>
-                </form>
+                        <input
+                            type="text"
+                            value={newMessage}
+                            onChange={(e) => setNewMessage(e.target.value)}
+                            placeholder="Type your message..."
+                            className="flex-1 p-2 rounded-lg border border-gray-100 bg-gray-300 focus:outline-none"
+                        />
+                        <button
+                            type="submit"
+                            className="ml-2 px-4 py-2 bg-blue-500 cursor-pointer text-white rounded-lg hover:bg-blue-600"
+                        >
+                            Send
+                        </button>
+                    </form>
+                </div>
             </div>
         </>
     );

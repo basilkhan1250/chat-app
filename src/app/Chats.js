@@ -12,7 +12,6 @@ const Chats = () => {
 
     const [selectedUserName, setSelectedUserName] = useState(people[0].name);
 
-    // Store separate messages for each person
     const [chatHistories, setChatHistories] = useState({
         Rin: [
             { text: "Hey! How are you?", sender: "them", senderName: "Rin", img: pfp },
@@ -26,12 +25,41 @@ const Chats = () => {
         Maya: [
             { text: "Hi Maya!", sender: "me", senderName: "You" },
             { text: "Hello! How's it going?", sender: "them", senderName: "Maya", img: pfp },
-            { text: "Pretty good! Just relaxing today.", sender: "me", senderName: "You" },
         ],
     });
 
     const [newMessage, setNewMessage] = useState("");
     const messagesEndRef = useRef(null);
+
+    // Sidebar width state
+    const [sidebarWidth, setSidebarWidth] = useState(300);
+    const isResizing = useRef(false);
+
+    const startResizing = () => {
+        isResizing.current = true;
+    };
+
+    const stopResizing = () => {
+        isResizing.current = false;
+    };
+
+    const handleMouseMove = (e) => {
+        if (isResizing.current) {
+            const newWidth = e.clientX;
+            if (newWidth > 150 && newWidth < 600) { // min/max width
+                setSidebarWidth(newWidth);
+            }
+        }
+    };
+
+    useEffect(() => {
+        window.addEventListener("mousemove", handleMouseMove);
+        window.addEventListener("mouseup", stopResizing);
+        return () => {
+            window.removeEventListener("mousemove", handleMouseMove);
+            window.removeEventListener("mouseup", stopResizing);
+        };
+    }, []);
 
     const sendMessage = (e) => {
         e.preventDefault();
@@ -46,16 +74,18 @@ const Chats = () => {
         setNewMessage("");
     };
 
-    // Auto scroll to latest message
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [chatHistories, selectedUserName]);
 
     return (
         <div className="fixed top-[70px] right-0 h-[92vh] w-full flex bg-gray-200">
-
+            
             {/* Sidebar (People List) */}
-            <div className="w-[300px] bg-gray-900 text-white overflow-y-auto">
+            <div
+                className="bg-gray-900 text-white overflow-y-auto"
+                style={{ width: sidebarWidth }}
+            >
                 <h2 className="p-4 font-bold text-lg border-b border-gray-700">Chats</h2>
                 {people.map((person, idx) => (
                     <div
@@ -68,6 +98,12 @@ const Chats = () => {
                     </div>
                 ))}
             </div>
+
+            {/* Drag Handle */}
+            <div
+                onMouseDown={startResizing}
+                className="w-1 bg-gray-600 cursor-col-resize hover:bg-gray-500"
+            ></div>
 
             {/* Chat Window */}
             <div className="flex-1 flex flex-col bg-gray-500 overflow-hidden">

@@ -1,10 +1,14 @@
 import Image from "next/image";
+import Search from "./Search";
+import Chats from "./Chats";
 
 export default function Home() {
   return (
     <>
+      <Search />
+      <Chats />
       <div className="container">
-          <h1 className="text-3xl">Hello</h1>
+
       </div>
     </>
   );

@@ -7,9 +7,7 @@ export default function Home() {
     <>
       <Search />
       <Chats />
-      <div className="container">
 
-      </div>
     </>
   );
 }

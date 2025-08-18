@@ -1,13 +1,25 @@
-import Image from "next/image";
+"use client";
+
 import Search from "./Search";
+import Auth from "./components/Auth";
 import Chats from "./Chats";
+import { useChat } from "./Context/ContextData";
 
 export default function Home() {
+  const { currentUser, loading } = useChat();
+
+  if (loading) {
+    return <p className="text-center mt-20">Loading...</p>;
+  }
+
+  if (!currentUser) {
+    return <Auth />;
+  }
+
   return (
-    <>
+    <div className="w-full h-screen bg-gray-100">
       <Search />
       <Chats />
-
-    </>
+    </div>
   );
 }

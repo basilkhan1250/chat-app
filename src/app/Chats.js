@@ -2,10 +2,11 @@
 import Image from "next/image";
 import React, { useState, useRef, useEffect } from "react";
 import pfp from "@/app/assets/basil.jpeg";
-import { usePeople } from "./Context/ContextData";
+import { useChat } from "./Context/ContextData";
+import ContactsList from "./components/ContactsLists";
 
 const Chats = () => {
-    const { people, selectedUserName, setSelectedUserName } = usePeople();
+    const [selectedUserName, setSelectedUserName] = useState(null);
 
     const [chatHistories, setChatHistories] = useState({
         Rin: [
@@ -70,23 +71,13 @@ const Chats = () => {
 
     return (
         <div className="fixed top-[70px] right-0 h-[92vh] w-full flex bg-gray-200">
-            {/* Sidebar (People List) */}
+            {/* Sidebar (ContactsList) */}
             <div
                 className="bg-gray-900 text-white overflow-y-auto"
                 style={{ width: sidebarWidth }}
             >
                 <h2 className="p-4 font-bold text-lg border-b border-gray-700">Chats</h2>
-                {people.map((person, idx) => (
-                    <div
-                        key={idx}
-                        onClick={() => setSelectedUserName(person.name)}
-                        className={`flex items-center gap-3 p-3 cursor-pointer hover:bg-gray-800 ${selectedUserName === person.name ? "bg-gray-800" : ""
-                            }`}
-                    >
-                        <Image src={person.img} alt={person.name} width={40} height={40} className="rounded-full" />
-                        <span className="font-medium">{person.name}</span>
-                    </div>
-                ))}
+                <ContactsList onSelectContact={setSelectedUserName} selected={selectedUserName} />
             </div>
 
             {/* Drag Handle */}
@@ -108,13 +99,11 @@ const Chats = () => {
                     {chatHistories[selectedUserName]?.map((msg, i) => (
                         <div
                             key={i}
-                            className={`text-lg text-gray-900 ${msg.sender === "me" ? "text-right" : "text-left"
-                                }`}
+                            className={`text-lg text-gray-900 ${msg.sender === "me" ? "text-right" : "text-left"}`}
                         >
                             <span className="font-semibold">{msg.senderName}: </span>
                             <div
-                                className={`flex mb-3 ${msg.sender === "me" ? "justify-end" : "justify-start"
-                                    }`}
+                                className={`flex mb-3 ${msg.sender === "me" ? "justify-end" : "justify-start"}`}
                             >
                                 <div
                                     className={`max-w-xs px-4 py-2 rounded-lg shadow-md ${msg.sender === "me"

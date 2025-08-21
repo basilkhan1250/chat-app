@@ -26,14 +26,14 @@ export default function Auth() {
                 // ✅ Sign up user
                 const res = await createUserWithEmailAndPassword(auth, email, password);
 
-                // ✅ Store contact in displayName (optional)
+                // ✅ Optional: store contact in displayName
                 await updateProfile(res.user, { displayName: contact });
 
-                // ✅ Save user in Firestore with UID (not contact) as document ID
+                // ✅ Save contactNumber as string
                 await setDoc(doc(db, "users", res.user.uid), {
                     uid: res.user.uid,
                     email,
-                    contact,
+                    contactNumber: contact.trim(), // 👈 always string
                 });
             }
         } catch (error) {
@@ -53,7 +53,7 @@ export default function Auth() {
 
                 {!isLogin && (
                     <input
-                        type="number"
+                        type="text" // 👈 text, not number
                         placeholder="Contact Number"
                         value={contact}
                         onChange={(e) => setContact(e.target.value)}
@@ -82,7 +82,7 @@ export default function Auth() {
 
                 <button
                     type="submit"
-                    className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600"
+                    className="w-full bg-blue-500 text-white py-2 cursor-pointer rounded hover:bg-blue-600"
                 >
                     {isLogin ? "Login" : "Sign Up"}
                 </button>
@@ -91,7 +91,7 @@ export default function Auth() {
                     {isLogin ? "Don’t have an account?" : "Already have an account?"}{" "}
                     <button
                         type="button"
-                        className="text-blue-500 underline"
+                        className="text-blue-500 cursor-pointer underline"
                         onClick={() => setIsLogin(!isLogin)}
                     >
                         {isLogin ? "Sign Up" : "Login"}

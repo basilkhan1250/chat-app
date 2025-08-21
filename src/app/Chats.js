@@ -2,25 +2,17 @@
 import Image from "next/image";
 import React, { useState, useRef, useEffect } from "react";
 import pfp from "@/app/assets/basil.jpeg";
-import { useChat } from "./Context/ContextData";
 import ContactsList from "./components/ContactsLists";
 
 const Chats = () => {
-    const [selectedUserName, setSelectedUserName] = useState(null);
+    const [selectedContact, setSelectedContact] = useState(null);
 
+    // Store chats per contactId
     const [chatHistories, setChatHistories] = useState({
-        Rin: [
-            { text: "Hey! How are you?", sender: "them", senderName: "Rin", img: pfp },
-            { text: "I'm good, thanks! And you?", sender: "me", senderName: "You" },
-            { text: "I'm great, just working on some projects.", sender: "them", senderName: "Rin", img: pfp },
-        ],
-        Alex: [
-            { text: "Yo Alex!", sender: "me", senderName: "You" },
-            { text: "Hey! Long time no see!", sender: "them", senderName: "Alex", img: pfp },
-        ],
-        Maya: [
-            { text: "Hi Maya!", sender: "me", senderName: "You" },
-            { text: "Hello! How's it going?", sender: "them", senderName: "Maya", img: pfp },
+        // Example dummy chat
+        demoUserId: [
+            { text: "Hey!", sender: "them", senderName: "Demo", img: pfp },
+            { text: "Hi!", sender: "me", senderName: "You" },
         ],
     });
 
@@ -54,11 +46,14 @@ const Chats = () => {
 
     const sendMessage = (e) => {
         e.preventDefault();
-        if (!newMessage.trim()) return;
+        if (!newMessage.trim() || !selectedContact) return;
+
+        const contactId = selectedContact.id;
+
         setChatHistories((prev) => ({
             ...prev,
-            [selectedUserName]: [
-                ...(prev[selectedUserName] || []),
+            [contactId]: [
+                ...(prev[contactId] || []),
                 { text: newMessage, sender: "me", senderName: "You" },
             ],
         }));
@@ -67,7 +62,7 @@ const Chats = () => {
 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    }, [chatHistories, selectedUserName]);
+    }, [chatHistories, selectedContact]);
 
     return (
         <div className="fixed top-[70px] right-0 h-[92vh] w-full flex bg-gray-200">
@@ -77,7 +72,10 @@ const Chats = () => {
                 style={{ width: sidebarWidth }}
             >
                 <h2 className="p-4 font-bold text-lg border-b border-gray-700">Chats</h2>
-                <ContactsList onSelectContact={setSelectedUserName} selected={selectedUserName} />
+                <ContactsList
+                    onSelect={setSelectedContact}
+                    selected={selectedContact}
+                />
             </div>
 
             {/* Drag Handle */}
@@ -90,37 +88,59 @@ const Chats = () => {
             <div className="flex-1 flex flex-col bg-gray-500 overflow-hidden">
                 {/* Navbar with selected user */}
                 <div className="bg-gray-800 text-white p-4 flex items-center gap-3 shadow-md">
-                    <Image src={pfp} alt="Profile" width={40} height={40} className="rounded-full" />
-                    <h2 className="text-xl font-semibold">{selectedUserName || "Chat"}</h2>
+                    <Image
+                        src={pfp}
+                        alt="Profile"
+                        width={40}
+                        height={40}
+                        className="rounded-full"
+                    />
+                    <h2 className="text-xl font-semibold">
+                        {selectedContact?.displayName ||
+                            selectedContact?.userName ||
+                            "Chat"}
+                    </h2>
                 </div>
 
                 {/* Messages */}
                 <div className="flex-1 p-4 overflow-y-auto">
-                    {chatHistories[selectedUserName]?.map((msg, i) => (
-                        <div
-                            key={i}
-                            className={`text-lg text-gray-900 ${msg.sender === "me" ? "text-right" : "text-left"}`}
-                        >
-                            <span className="font-semibold">{msg.senderName}: </span>
+                    {selectedContact &&
+                        chatHistories[selectedContact.id]?.map((msg, i) => (
                             <div
-                                className={`flex mb-3 ${msg.sender === "me" ? "justify-end" : "justify-start"}`}
+                                key={i}
+                                className={`text-lg text-gray-900 ${
+                                    msg.sender === "me"
+                                        ? "text-right"
+                                        : "text-left"
+                                }`}
                             >
+                                <span className="font-semibold">
+                                    {msg.senderName}:{" "}
+                                </span>
                                 <div
-                                    className={`max-w-xs px-4 py-2 rounded-lg shadow-md ${msg.sender === "me"
-                                            ? "bg-blue-500 text-white rounded-br-none"
-                                            : "bg-gray-300 text-gray-900 rounded-bl-none"
-                                        }`}
+                                    className={`flex mb-3 ${
+                                        msg.sender === "me"
+                                            ? "justify-end"
+                                            : "justify-start"
+                                    }`}
                                 >
-                                    {msg.text}
+                                    <div
+                                        className={`max-w-xs px-4 py-2 rounded-lg shadow-md ${
+                                            msg.sender === "me"
+                                                ? "bg-blue-500 text-white rounded-br-none"
+                                                : "bg-gray-300 text-gray-900 rounded-bl-none"
+                                        }`}
+                                    >
+                                        {msg.text}
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    ))}
+                        ))}
                     <div ref={messagesEndRef} />
                 </div>
 
                 {/* Input */}
-                {selectedUserName && (
+                {selectedContact && (
                     <form
                         onSubmit={sendMessage}
                         className="bg-gray-700 p-2 border-t border-gray-500 flex items-center w-full"

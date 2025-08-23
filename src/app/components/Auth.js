@@ -13,6 +13,7 @@ export default function Auth() {
     const [isLogin, setIsLogin] = useState(true);
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [displayName, setDisplayName] = useState("");
     const [contact, setContact] = useState("");
 
     const handleSubmit = async (e) => {
@@ -26,14 +27,15 @@ export default function Auth() {
                 // ✅ Sign up user
                 const res = await createUserWithEmailAndPassword(auth, email, password);
 
-                // ✅ Optional: store contact in displayName
-                await updateProfile(res.user, { displayName: contact });
+                // ✅ Set displayName on Firebase Auth user
+                await updateProfile(res.user, { displayName });
 
-                // ✅ Save contactNumber as string
+                // ✅ Save user in Firestore
                 await setDoc(doc(db, "users", res.user.uid), {
                     uid: res.user.uid,
                     email,
-                    contactNumber: contact.trim(), // 👈 always string
+                    displayName,
+                    contactNumber: contact.trim(), // 👈 string
                 });
             }
         } catch (error) {
@@ -52,14 +54,24 @@ export default function Auth() {
                 </h2>
 
                 {!isLogin && (
-                    <input
-                        type="text" // 👈 text, not number
-                        placeholder="Contact Number"
-                        value={contact}
-                        onChange={(e) => setContact(e.target.value)}
-                        required
-                        className="w-full mb-4 p-2 border rounded"
-                    />
+                    <>
+                        <input
+                            type="text"
+                            placeholder="Display Name"
+                            value={displayName}
+                            onChange={(e) => setDisplayName(e.target.value)}
+                            required
+                            className="w-full mb-4 p-2 border rounded"
+                        />
+                        <input
+                            type="text"
+                            placeholder="Contact Number"
+                            value={contact}
+                            onChange={(e) => setContact(e.target.value)}
+                            required
+                            className="w-full mb-4 p-2 border rounded"
+                        />
+                    </>
                 )}
 
                 <input

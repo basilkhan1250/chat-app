@@ -16,7 +16,7 @@ const AddContact = () => {
         try {
             const formattedNumber = contactNumber.trim();
 
-            // 🔍 Search user by contactNumber (string)
+            // 🔍 Look up the user in Firestore (users collection)
             const q = query(
                 collection(db, "users"),
                 where("contactNumber", "==", formattedNumber)
@@ -29,7 +29,6 @@ const AddContact = () => {
             }
 
             const targetDoc = querySnapshot.docs[0];
-            console.log(targetDoc);
             const targetData = targetDoc.data();
 
             // 🛑 Prevent adding yourself
@@ -38,23 +37,30 @@ const AddContact = () => {
                 return;
             }
 
-            // ➕ Add contact with custom name OR userName
-            await setDoc(
-                doc(db, "users", currentUser.uid, "contacts", targetData.uid),
-                {
-                    uid: targetData.uid,
-                    userName: targetData.userName || "", // 👈 keep real username
-                    displayName: customName, // 👈 save user-chosen name
-                }
+            // ➕ Save contact in Firestore under currentUser's contacts
+            const contactRef = doc(
+                db,
+                "users",
+                currentUser.uid,
+                "contacts",
+                targetData.uid
             );
 
-            // 🟢 Update local state
+            await setDoc(contactRef, {
+                uid: targetData.uid,
+                userName: targetData.userName || "",
+                contactNumber: targetData.contactNumber || "",
+                displayName: customName || targetData.userName,
+            });
+
+            // 🟢 Update local state so UI refreshes
             setContacts((prev) => [
-                ...prev,
+                ...prev.filter((c) => c.uid !== targetData.uid), // avoid duplicates
                 {
                     uid: targetData.uid,
                     userName: targetData.userName || "",
-                    displayName: customName,
+                    contactNumber: targetData.contactNumber || "",
+                    displayName: customName || targetData.userName,
                 },
             ]);
 

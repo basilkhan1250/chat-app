@@ -3,23 +3,26 @@ import Image from "next/image";
 import React, { useState, useRef, useEffect } from "react";
 import pfp from "@/app/assets/basil.jpeg";
 import ContactsList from "./components/ContactsLists";
+import { useChat } from "./Context/ContextData";
+import {
+    collection,
+    addDoc,
+    onSnapshot,
+    query,
+    orderBy,
+    serverTimestamp,
+    doc,
+    setDoc,
+} from "firebase/firestore";
+import { db } from "../../utils/firebaseConfig";
 
 const Chats = () => {
+    const { currentUser } = useChat();
     const [selectedContact, setSelectedContact] = useState(null);
-
-    // Store chats per contactId
-    const [chatHistories, setChatHistories] = useState({
-        // Example dummy chat
-        demoUserId: [
-            { text: "Hey!", sender: "them", senderName: "Demo", img: pfp },
-            { text: "Hi!", sender: "me", senderName: "You" },
-        ],
-    });
-
+    const [chatHistories, setChatHistories] = useState({});
     const [newMessage, setNewMessage] = useState("");
     const messagesEndRef = useRef(null);
 
-    // Sidebar resizer
     const [sidebarWidth, setSidebarWidth] = useState(300);
     const isResizing = useRef(false);
 
@@ -44,21 +47,86 @@ const Chats = () => {
         };
     }, []);
 
-    const sendMessage = (e) => {
+    // 🔥 Send message to Firestore + update both users' contacts
+    const sendMessage = async (e) => {
         e.preventDefault();
-        if (!newMessage.trim() || !selectedContact) return;
+        if (!newMessage.trim() || !selectedContact || !currentUser) return;
 
-        const contactId = selectedContact.id;
+        const chatId =
+            currentUser.uid < selectedContact.id
+                ? `${currentUser.uid}_${selectedContact.id}`
+                : `${selectedContact.id}_${currentUser.uid}`;
 
-        setChatHistories((prev) => ({
-            ...prev,
-            [contactId]: [
-                ...(prev[contactId] || []),
-                { text: newMessage, sender: "me", senderName: "You" },
-            ],
-        }));
-        setNewMessage("");
+        try {
+            // Save message
+            await addDoc(collection(db, "chats", chatId, "messages"), {
+                text: newMessage,
+                senderId: currentUser.uid,
+                senderName: currentUser.displayName || "Me",
+                timestamp: serverTimestamp(),
+            });
+
+            // Update "last message" for current user
+            await setDoc(
+                doc(db, "users", currentUser.uid, "contacts", selectedContact.id),
+                {
+                    id: selectedContact.id,
+                    displayName:
+                        selectedContact.displayName ||
+                        selectedContact.userName ||
+                        "Contact",
+                    lastMessage: newMessage,
+                    lastMessageTime: serverTimestamp(),
+                },
+                { merge: true }
+            );
+
+            // Update "last message" for receiver
+            await setDoc(
+                doc(db, "users", selectedContact.id, "contacts", currentUser.uid),
+                {
+                    id: currentUser.uid,
+                    displayName: currentUser.displayName || "Me",
+                    lastMessage: newMessage,
+                    lastMessageTime: serverTimestamp(),
+                },
+                { merge: true }
+            );
+
+            setNewMessage("");
+        } catch (err) {
+            console.error("Error sending message:", err);
+        }
     };
+
+    // 🔄 Listen for messages
+    useEffect(() => {
+        if (!selectedContact || !currentUser) return;
+
+        const chatId =
+            currentUser.uid < selectedContact.id
+                ? `${currentUser.uid}_${selectedContact.id}`
+                : `${selectedContact.id}_${currentUser.uid}`;
+
+        const q = query(
+            collection(db, "chats", chatId, "messages"),
+            orderBy("timestamp", "asc")
+        );
+
+        const unsub = onSnapshot(q, (snapshot) => {
+            const msgs = snapshot.docs.map((doc) => ({
+                id: doc.id,
+                ...doc.data(),
+            }));
+
+            setChatHistories((prev) => ({
+                ...prev,
+                [selectedContact.id]: msgs,
+            }));
+        });
+
+        return () => unsub();
+    }, [selectedContact, currentUser]);
 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -66,12 +134,14 @@ const Chats = () => {
 
     return (
         <div className="fixed top-[70px] right-0 h-[92vh] w-full flex bg-gray-200">
-            {/* Sidebar (ContactsList) */}
+            {/* Sidebar */}
             <div
                 className="bg-gray-900 text-white overflow-y-auto"
                 style={{ width: sidebarWidth }}
             >
-                <h2 className="p-4 font-bold text-lg border-b border-gray-700">Chats</h2>
+                <h1 className="p-4 font-bold text-2xl border-b border-gray-700">
+                    {currentUser?.displayName || "Chats"}
+                </h1>
                 <ContactsList
                     onSelect={setSelectedContact}
                     selected={selectedContact}
@@ -86,7 +156,7 @@ const Chats = () => {
 
             {/* Chat Window */}
             <div className="flex-1 flex flex-col bg-gray-500 overflow-hidden">
-                {/* Navbar with selected user */}
+                {/* Navbar */}
                 <div className="bg-gray-800 text-white p-4 flex items-center gap-3 shadow-md">
                     <Image
                         src={pfp}
@@ -105,11 +175,11 @@ const Chats = () => {
                 {/* Messages */}
                 <div className="flex-1 p-4 overflow-y-auto">
                     {selectedContact &&
-                        chatHistories[selectedContact.id]?.map((msg, i) => (
+                        chatHistories[selectedContact.id]?.map((msg) => (
                             <div
-                                key={i}
+                                key={msg.id}
                                 className={`text-lg text-gray-900 ${
-                                    msg.sender === "me"
+                                    msg.senderId === currentUser.uid
                                         ? "text-right"
                                         : "text-left"
                                 }`}
@@ -119,14 +189,14 @@ const Chats = () => {
                                 </span>
                                 <div
                                     className={`flex mb-3 ${
-                                        msg.sender === "me"
+                                        msg.senderId === currentUser.uid
                                             ? "justify-end"
                                             : "justify-start"
                                     }`}
                                 >
                                     <div
                                         className={`max-w-xs px-4 py-2 rounded-lg shadow-md ${
-                                            msg.sender === "me"
+                                            msg.senderId === currentUser.uid
                                                 ? "bg-blue-500 text-white rounded-br-none"
                                                 : "bg-gray-300 text-gray-900 rounded-bl-none"
                                         }`}

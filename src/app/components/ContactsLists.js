@@ -18,7 +18,6 @@ const ContactsList = ({ onSelect, selected }) => {
                     ...doc.data(),
                 }));
 
-                // ✅ Sort contacts by lastMessageTime (latest first)
                 const sorted = contactList.sort((a, b) => {
                     if (!a.lastMessageTime) return 1;
                     if (!b.lastMessageTime) return -1;
@@ -36,24 +35,31 @@ const ContactsList = ({ onSelect, selected }) => {
     }, [currentUser, setContacts]);
 
     return (
-        <div className="p-4">
-            <h2 className="text-lg font-bold mb-2">Contacts</h2>
-            {contacts.length === 0 && <p>No contacts yet.</p>}
-            <ul>
+        <div className="h-full flex flex-col">
+            <h2 className="px-4 py-3 text-xl font-bold bg-gray-800 text-white border-b border-gray-700">
+                Contacts
+            </h2>
+            {contacts.length === 0 && (
+                <p className="p-4 text-gray-400">No contacts yet.</p>
+            )}
+            <ul className="flex-1 overflow-y-auto">
                 {contacts.map((c) => (
                     <li
                         key={c.id}
                         onClick={() => onSelect(c)}
-                        className={`cursor-pointer p-3 border-b hover:bg-gray-700 ${selected?.id === c.id ? "bg-gray-800" : ""
-                            }`}
+                        className={`cursor-pointer px-4 py-3 flex flex-col border-b border-gray-700 transition-colors ${
+                            selected?.id === c.id
+                                ? "bg-gray-700"
+                                : "hover:bg-gray-800"
+                        }`}
                     >
-                        <p className="font-semibold">
+                        <span className="font-semibold text-white">
                             {c.displayName || c.userName || "Unnamed Contact"}
-                        </p>
+                        </span>
                         {c.lastMessage && (
-                            <p className="text-sm text-gray-500 truncate">
+                            <span className="text-sm text-gray-400 truncate">
                                 {c.lastMessage}
-                            </p>
+                            </span>
                         )}
                     </li>
                 ))}

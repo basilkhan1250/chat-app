@@ -14,12 +14,9 @@ const AddContact = () => {
         if (!contactNumber.trim() || !customName.trim() || !currentUser) return;
 
         try {
-            const formattedNumber = contactNumber.trim();
-
-            // 🔍 Look up the user in Firestore (users collection)
             const q = query(
                 collection(db, "users"),
-                where("contactNumber", "==", formattedNumber)
+                where("contactNumber", "==", contactNumber.trim())
             );
             const querySnapshot = await getDocs(q);
 
@@ -31,13 +28,11 @@ const AddContact = () => {
             const targetDoc = querySnapshot.docs[0];
             const targetData = targetDoc.data();
 
-            // 🛑 Prevent adding yourself
             if (targetData.uid === currentUser.uid) {
                 alert("You cannot add yourself!");
                 return;
             }
 
-            // ➕ Save contact in Firestore under currentUser's contacts
             const contactRef = doc(
                 db,
                 "users",
@@ -53,9 +48,8 @@ const AddContact = () => {
                 displayName: customName || targetData.userName,
             });
 
-            // 🟢 Update local state so UI refreshes
             setContacts((prev) => [
-                ...prev.filter((c) => c.uid !== targetData.uid), // avoid duplicates
+                ...prev.filter((c) => c.uid !== targetData.uid),
                 {
                     uid: targetData.uid,
                     userName: targetData.userName || "",
@@ -72,13 +66,13 @@ const AddContact = () => {
     };
 
     return (
-        <div className="p-4 flex flex-col gap-2">
+        <div className="p-6 bg-gray-100 rounded-lg shadow-md space-y-4">
             <input
                 type="text"
                 value={contactNumber}
                 onChange={(e) => setContactNumber(e.target.value)}
                 placeholder="Enter contact number"
-                className="border p-2 rounded"
+                className="w-full p-3 border rounded-lg focus:ring focus:ring-blue-400"
             />
 
             <input
@@ -86,12 +80,12 @@ const AddContact = () => {
                 value={customName}
                 onChange={(e) => setCustomName(e.target.value)}
                 placeholder="Enter a name for this contact"
-                className="border p-2 rounded"
+                className="w-full p-3 border rounded-lg focus:ring focus:ring-blue-400"
             />
 
             <button
                 onClick={handleAdd}
-                className="cursor-pointer bg-blue-500 text-white px-3 py-1 rounded"
+                className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-3 rounded-lg shadow hover:opacity-90 transition cursor-pointer"
             >
                 Add Contact
             </button>

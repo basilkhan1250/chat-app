@@ -21,21 +21,16 @@ export default function Auth() {
 
         try {
             if (isLogin) {
-                // ✅ Login user
                 await signInWithEmailAndPassword(auth, email, password);
             } else {
-                // ✅ Sign up user
                 const res = await createUserWithEmailAndPassword(auth, email, password);
-
-                // ✅ Set displayName on Firebase Auth user
                 await updateProfile(res.user, { displayName });
 
-                // ✅ Save user in Firestore
                 await setDoc(doc(db, "users", res.user.uid), {
                     uid: res.user.uid,
                     email,
                     displayName,
-                    contactNumber: contact.trim(), // 👈 string
+                    contactNumber: contact.trim(),
                 });
             }
         } catch (error) {
@@ -44,13 +39,13 @@ export default function Auth() {
     };
 
     return (
-        <div className="flex items-center justify-center h-screen bg-gray-100">
+        <div className="flex items-center justify-center h-screen bg-gradient-to-br from-blue-500 via-purple-600 to-pink-500">
             <form
                 onSubmit={handleSubmit}
-                className="bg-white p-8 rounded-xl shadow-md w-96"
+                className="bg-white/90 backdrop-blur-lg p-8 rounded-2xl shadow-xl w-96"
             >
-                <h2 className="text-2xl font-bold mb-6 text-center">
-                    {isLogin ? "Login" : "Sign Up"}
+                <h2 className="text-3xl font-bold mb-6 text-center text-gray-800">
+                    {isLogin ? "Welcome Back" : "Create Account"}
                 </h2>
 
                 {!isLogin && (
@@ -61,7 +56,7 @@ export default function Auth() {
                             value={displayName}
                             onChange={(e) => setDisplayName(e.target.value)}
                             required
-                            className="w-full mb-4 p-2 border rounded"
+                            className="w-full mb-4 p-3 border rounded-lg focus:ring focus:ring-blue-400"
                         />
                         <input
                             type="text"
@@ -69,7 +64,7 @@ export default function Auth() {
                             value={contact}
                             onChange={(e) => setContact(e.target.value)}
                             required
-                            className="w-full mb-4 p-2 border rounded"
+                            className="w-full mb-4 p-3 border rounded-lg focus:ring focus:ring-blue-400"
                         />
                     </>
                 )}
@@ -80,7 +75,7 @@ export default function Auth() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    className="w-full mb-4 p-2 border rounded"
+                    className="w-full mb-4 p-3 border rounded-lg focus:ring focus:ring-blue-400"
                 />
 
                 <input
@@ -89,21 +84,21 @@ export default function Auth() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
-                    className="w-full mb-4 p-2 border rounded"
+                    className="w-full mb-6 p-3 border rounded-lg focus:ring focus:ring-blue-400"
                 />
 
                 <button
                     type="submit"
-                    className="w-full bg-blue-500 text-white py-2 cursor-pointer rounded hover:bg-blue-600"
+                    className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-3 rounded-lg shadow hover:opacity-90 transition"
                 >
                     {isLogin ? "Login" : "Sign Up"}
                 </button>
 
-                <p className="mt-4 text-center">
+                <p className="mt-6 text-center text-gray-600">
                     {isLogin ? "Don’t have an account?" : "Already have an account?"}{" "}
                     <button
                         type="button"
-                        className="text-blue-500 cursor-pointer underline"
+                        className="text-blue-600 font-semibold cursor-pointer underline"
                         onClick={() => setIsLogin(!isLogin)}
                     >
                         {isLogin ? "Sign Up" : "Login"}

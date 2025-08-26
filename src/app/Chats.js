@@ -47,7 +47,6 @@ const Chats = () => {
         };
     }, []);
 
-    // 🔥 Send message to Firestore + update both users' contacts
     const sendMessage = async (e) => {
         e.preventDefault();
         if (!newMessage.trim() || !selectedContact || !currentUser) return;
@@ -58,7 +57,6 @@ const Chats = () => {
                 : `${selectedContact.id}_${currentUser.uid}`;
 
         try {
-            // Save message
             await addDoc(collection(db, "chats", chatId, "messages"), {
                 text: newMessage,
                 senderId: currentUser.uid,
@@ -66,7 +64,6 @@ const Chats = () => {
                 timestamp: serverTimestamp(),
             });
 
-            // Update "last message" for current user
             await setDoc(
                 doc(db, "users", currentUser.uid, "contacts", selectedContact.id),
                 {
@@ -81,7 +78,6 @@ const Chats = () => {
                 { merge: true }
             );
 
-            // Update "last message" for receiver
             await setDoc(
                 doc(db, "users", selectedContact.id, "contacts", currentUser.uid),
                 {
@@ -99,7 +95,6 @@ const Chats = () => {
         }
     };
 
-    // 🔄 Listen for messages
     useEffect(() => {
         if (!selectedContact || !currentUser) return;
 
@@ -133,13 +128,13 @@ const Chats = () => {
     }, [chatHistories, selectedContact]);
 
     return (
-        <div className="fixed top-[70px] right-0 h-[92vh] w-full flex bg-gray-200">
+        <div className="fixed top-[70px] right-0 h-[92vh] w-full flex bg-gray-100">
             {/* Sidebar */}
             <div
-                className="bg-gray-900 text-white overflow-y-auto"
+                className="bg-gray-900 text-white overflow-y-auto border-r border-gray-800"
                 style={{ width: sidebarWidth }}
             >
-                <h1 className="p-4 font-bold text-2xl border-b border-gray-700">
+                <h1 className="p-4 font-bold text-2xl border-b border-gray-700 bg-gray-800">
                     {currentUser?.displayName || "Chats"}
                 </h1>
                 <ContactsList
@@ -155,17 +150,17 @@ const Chats = () => {
             ></div>
 
             {/* Chat Window */}
-            <div className="flex-1 flex flex-col bg-gray-500 overflow-hidden">
+            <div className="flex-1 flex flex-col bg-gradient-to-br from-gray-100 to-gray-200">
                 {/* Navbar */}
-                <div className="bg-gray-800 text-white p-4 flex items-center gap-3 shadow-md">
+                <div className="bg-white border-b border-gray-300 p-4 flex items-center gap-3 shadow-sm">
                     <Image
                         src={pfp}
                         alt="Profile"
                         width={40}
                         height={40}
-                        className="rounded-full"
+                        className="rounded-full border"
                     />
-                    <h2 className="text-xl font-semibold">
+                    <h2 className="text-lg font-semibold text-gray-800">
                         {selectedContact?.displayName ||
                             selectedContact?.userName ||
                             "Chat"}
@@ -178,31 +173,20 @@ const Chats = () => {
                         chatHistories[selectedContact.id]?.map((msg) => (
                             <div
                                 key={msg.id}
-                                className={`text-lg text-gray-900 ${
+                                className={`mb-3 flex ${
                                     msg.senderId === currentUser.uid
-                                        ? "text-right"
-                                        : "text-left"
+                                        ? "justify-end"
+                                        : "justify-start"
                                 }`}
                             >
-                                <span className="font-semibold">
-                                    {msg.senderName}:{" "}
-                                </span>
                                 <div
-                                    className={`flex mb-3 ${
+                                    className={`max-w-xs px-4 py-2 rounded-2xl shadow-md text-sm ${
                                         msg.senderId === currentUser.uid
-                                            ? "justify-end"
-                                            : "justify-start"
+                                            ? "bg-blue-500 text-white rounded-br-none"
+                                            : "bg-white text-gray-800 border rounded-bl-none"
                                     }`}
                                 >
-                                    <div
-                                        className={`max-w-xs px-4 py-2 rounded-lg shadow-md ${
-                                            msg.senderId === currentUser.uid
-                                                ? "bg-blue-500 text-white rounded-br-none"
-                                                : "bg-gray-300 text-gray-900 rounded-bl-none"
-                                        }`}
-                                    >
-                                        {msg.text}
-                                    </div>
+                                    {msg.text}
                                 </div>
                             </div>
                         ))}
@@ -213,18 +197,18 @@ const Chats = () => {
                 {selectedContact && (
                     <form
                         onSubmit={sendMessage}
-                        className="bg-gray-700 p-2 border-t border-gray-500 flex items-center w-full"
+                        className="bg-white p-3 border-t border-gray-300 flex items-center gap-2"
                     >
                         <input
                             type="text"
                             value={newMessage}
                             onChange={(e) => setNewMessage(e.target.value)}
-                            placeholder="Type your message..."
-                            className="flex-1 p-2 rounded-lg border border-gray-100 bg-gray-300 focus:outline-none"
+                            placeholder="Type a message..."
+                            className="flex-1 p-3 rounded-full border border-gray-300 focus:ring focus:ring-blue-400"
                         />
                         <button
                             type="submit"
-                            className="ml-2 px-4 py-2 bg-blue-500 cursor-pointer text-white rounded-lg hover:bg-blue-600"
+                            className="px-5 py-2 bg-blue-500 text-white rounded-full shadow hover:bg-blue-600 transition cursor-pointer"
                         >
                             Send
                         </button>

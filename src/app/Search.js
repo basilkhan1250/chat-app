@@ -6,20 +6,26 @@ import { useChat } from "./Context/ContextData";
 import { getAuth, signOut } from "firebase/auth";
 import AddContact from "./components/AddContact";
 
-function Search() {
-    const { contacts, setSelectedUserName } = useChat();
+function Search({ onSelect, selected }) {
+    console.log(selected);
+    const { contacts } = useChat();
     const searchUser = useRef(null);
     const [showAddContact, setShowAddContact] = useState(false);
+    const [selectedUsername, setSelectedUserName] = useState("");
 
     const handleSearch = (e) => {
         e.preventDefault();
+        console.log(contacts)
         const userInput = searchUser.current.value.trim();
+        console.log(userInput)
         const found = contacts.find(
-            (p) => p.name.toLowerCase() === userInput.toLowerCase()
+            (p) => p.displayName.toLowerCase() === userInput.toLowerCase()
         );
+        console.log(found)
 
         if (found) {
-            setSelectedUserName(found.name); // ✅ switch chat
+            console.log(found.displayName)
+            setSelectedUserName(found.displayName);
         } else {
             alert("User not found!");
         }
@@ -41,7 +47,8 @@ function Search() {
         <div className="bg-blue-900 w-full h-[70px] flex items-center justify-between px-4 fixed top-0 left-0 z-50">
             {/* Logo / Reset Chat */}
             <h1
-                onClick={() => setSelectedUserName(null)}
+                onClick={() => onSelect(null)}
+                // onClick={() => setSelectedUserName(null)}
                 className="text-3xl font-semibold text-white cursor-pointer"
             >
                 Wassup

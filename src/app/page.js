@@ -4,9 +4,12 @@ import Search from "./Search";
 import Auth from "./components/Auth";
 import Chats from "./Chats";
 import { useChat } from "./Context/ContextData";
+import { useState } from "react";
 
 export default function Home() {
   const { currentUser, loading } = useChat();
+  const [selectedContact, setSelectedContact] = useState(null);
+
 
   if (loading) {
     return <p className="text-center mt-20">Loading...</p>;
@@ -18,7 +21,10 @@ export default function Home() {
 
   return (
     <div className="w-full h-screen bg-gray-100">
-      <Search />
+      {/* <Search 
+        onSelect={setSelectedContact}
+        selected={selectedContact}
+      /> */}
       <Chats />
     </div>
   );

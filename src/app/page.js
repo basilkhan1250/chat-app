@@ -8,7 +8,6 @@ import { useState } from "react";
 
 export default function Home() {
   const { currentUser, loading } = useChat();
-  const [selectedContact, setSelectedContact] = useState(null);
 
 
   if (loading) {
@@ -21,10 +20,6 @@ export default function Home() {
 
   return (
     <div className="w-full h-screen bg-gray-100">
-      {/* <Search 
-        onSelect={setSelectedContact}
-        selected={selectedContact}
-      /> */}
       <Chats />
     </div>
   );

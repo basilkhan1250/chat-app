@@ -16,6 +16,7 @@ import {
 } from "firebase/firestore";
 import { db } from "../../utils/firebaseConfig";
 import Search from "./Search";
+import bgImage from "./assets/bgImageNexts.jpg";
 
 const Chats = () => {
     const { currentUser } = useChat();
@@ -158,7 +159,7 @@ const Chats = () => {
                 {/* Chat Window */}
                 <div className="flex-1 flex flex-col bg-gradient-to-br from-gray-100 to-gray-200">
                     {/* Navbar */}
-                    <div className="bg-white border-b border-gray-300 p-4 flex items-center gap-3 shadow-sm">
+                    <div className="bg-slate-800 border-b border-gray-300 p-4 flex items-center gap-3 shadow-sm">
                         <Image
                             src={pfp}
                             alt="Profile"
@@ -166,15 +167,17 @@ const Chats = () => {
                             height={40}
                             className="rounded-full border"
                         />
-                        <h2 className="text-lg font-semibold text-gray-800">
+                        <h2 className="text-lg font-semibold text-gray-100">
                             {selectedContact?.displayName ||
                                 selectedContact?.userName ||
-                                "Chat"}
+                                "Start the chat"}
                         </h2>
                     </div>
 
                     {/* Messages */}
-                    <div className="flex-1 p-4 overflow-y-auto">
+                    <div className="flex-1  p-4 overflow-y-auto"
+                        style={{ backgroundImage: `url(${bgImage.src})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
+                    >
                         {selectedContact &&
                             chatHistories[selectedContact.id]?.map((msg) => (
                                 <div
@@ -201,14 +204,16 @@ const Chats = () => {
                     {selectedContact && (
                         <form
                             onSubmit={sendMessage}
-                            className="bg-white p-3 border-t border-gray-300 flex items-center gap-2"
+                            className="bg-slate-800 p-3 border-t border-gray-300 flex items-center gap-2"
                         >
                             <input
                                 type="text"
                                 value={newMessage}
                                 onChange={(e) => setNewMessage(e.target.value)}
                                 placeholder="Type a message..."
-                                className="flex-1 p-3 rounded-full border border-gray-300 focus:ring focus:ring-blue-400"
+                                className="flex-1 p-3 rounded-full border border-gray-100 
+                                           focus:ring focus:ring-blue-400 
+                                           text-white placeholder-white bg-transparent"
                             />
                             <button
                                 type="submit"
@@ -219,7 +224,7 @@ const Chats = () => {
                         </form>
                     )}
                 </div>
-            </div>
+            </div >
         </>
     );
 };

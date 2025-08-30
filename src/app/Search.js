@@ -16,6 +16,7 @@ function Search({ onSelect, selected }) {
     const handleSearch = (e) => {
         e.preventDefault();
         console.log(contacts)
+        console.log(searchUser.current.value)
         const userInput = searchUser.current.value.trim();
         console.log(userInput)
         const found = contacts.find(
@@ -26,6 +27,7 @@ function Search({ onSelect, selected }) {
         if (found) {
             console.log(found.displayName)
             setSelectedUserName(found.displayName);
+            console.log(selectedUsername)
         } else {
             alert("User not found!");
         }

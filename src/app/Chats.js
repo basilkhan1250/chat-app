@@ -25,6 +25,10 @@ const Chats = () => {
     const [newMessage, setNewMessage] = useState("");
     const messagesEndRef = useRef(null);
 
+    // ✅ Track mobile view and whether chat is open
+    const [isMobile, setIsMobile] = useState(false);
+    const [showChat, setShowChat] = useState(false);
+
     const [sidebarWidth, setSidebarWidth] = useState(300);
     const isResizing = useRef(false);
 
@@ -43,18 +47,22 @@ const Chats = () => {
     useEffect(() => {
         window.addEventListener("mousemove", handleMouseMove);
         window.addEventListener("mouseup", stopResizing);
+
+        // ✅ Check if screen is mobile
+        const checkMobile = () => setIsMobile(window.innerWidth < 768);
+        checkMobile();
+        window.addEventListener("resize", checkMobile);
+
         return () => {
             window.removeEventListener("mousemove", handleMouseMove);
             window.removeEventListener("mouseup", stopResizing);
+            window.removeEventListener("resize", checkMobile);
         };
     }, []);
 
-    // ✅ Helper function to safely build chatId
     const getChatId = (uid1, uid2) => {
         if (!uid1 || !uid2) return null;
-        return uid1.localeCompare(uid2) < 0
-            ? `${uid1}_${uid2}`
-            : `${uid2}_${uid1}`;
+        return uid1.localeCompare(uid2) < 0 ? `${uid1}_${uid2}` : `${uid2}_${uid1}`;
     };
 
     const sendMessage = async (e) => {
@@ -62,7 +70,7 @@ const Chats = () => {
         if (!newMessage.trim() || !selectedContact || !currentUser) return;
 
         const chatId = getChatId(currentUser.uid, selectedContact.id);
-        if (!chatId) return; // guard in case IDs are missing
+        if (!chatId) return;
 
         try {
             await addDoc(collection(db, "chats", chatId, "messages"), {
@@ -139,28 +147,43 @@ const Chats = () => {
             <div className="fixed top-[70px] right-0 h-[92vh] w-full flex bg-gray-100">
                 {/* Sidebar */}
                 <div
-                    className="bg-gray-900 text-white overflow-y-auto border-r border-gray-800"
-                    style={{ width: sidebarWidth }}
+                    className={`${isMobile ? (showChat ? "hidden" : "block") : "block"} 
+                      bg-gray-900 text-white overflow-y-auto border-r border-gray-800`}
+                    style={{ width: isMobile ? "100%" : sidebarWidth }}
                 >
                     <h1 className="p-4 font-bold text-2xl border-b border-gray-700 bg-gray-800">
                         {currentUser?.displayName || "Chats"}
                     </h1>
                     <ContactsList
-                        onSelect={setSelectedContact}
+                        onSelect={(c) => {
+                            setSelectedContact(c);
+                            if (isMobile) setShowChat(true); // ✅ open chat on mobile
+                        }}
                         selected={selectedContact}
                     />
                 </div>
 
-                {/* Drag Handle */}
+                {/* Drag Handle (desktop only) */}
                 <div
                     onMouseDown={startResizing}
-                    className="w-1 bg-gray-600 cursor-col-resize hover:bg-gray-500"
+                    className="hidden md:block w-1 bg-gray-600 cursor-col-resize hover:bg-gray-500"
                 ></div>
 
                 {/* Chat Window */}
-                <div className="flex-1 flex flex-col bg-gradient-to-br from-gray-100 to-gray-200">
+                <div
+                    className={`${isMobile ? (showChat ? "flex" : "hidden") : "flex"} 
+                      flex-1 flex-col bg-gradient-to-br from-gray-100 to-gray-200`}
+                >
                     {/* Navbar */}
                     <div className="bg-slate-800 border-b border-gray-300 p-4 flex items-center gap-3 shadow-sm">
+                        {isMobile && showChat && (
+                            <button
+                                className="text-white mr-3 cursor-pointer"
+                                onClick={() => setShowChat(false)}
+                            >
+                                ←
+                            </button>
+                        )}
                         <Image
                             src={pfp}
                             alt="Profile"
@@ -188,18 +211,16 @@ const Chats = () => {
                             chatHistories[selectedContact.id]?.map((msg) => (
                                 <div
                                     key={msg.id}
-                                    className={`mb-3 flex ${
-                                        msg.senderId === currentUser.uid
+                                    className={`mb-3 flex ${msg.senderId === currentUser.uid
                                             ? "justify-end"
                                             : "justify-start"
-                                    }`}
+                                        }`}
                                 >
                                     <div
-                                        className={`max-w-xs px-4 py-2 rounded-2xl shadow-md text-sm ${
-                                            msg.senderId === currentUser.uid
+                                        className={`max-w-xs px-4 py-2 rounded-2xl shadow-md text-sm ${msg.senderId === currentUser.uid
                                                 ? "bg-blue-500 text-white rounded-br-none"
                                                 : "bg-white text-gray-800 border rounded-bl-none"
-                                        }`}
+                                            }`}
                                     >
                                         {msg.text}
                                     </div>
@@ -220,8 +241,8 @@ const Chats = () => {
                                 onChange={(e) => setNewMessage(e.target.value)}
                                 placeholder="Type a message..."
                                 className="flex-1 p-3 rounded-full border border-gray-100 
-                                           focus:ring focus:ring-blue-400 
-                                           text-white placeholder-white bg-transparent"
+                           focus:ring focus:ring-blue-400 
+                           text-white placeholder-white bg-transparent"
                             />
                             <button
                                 type="submit"

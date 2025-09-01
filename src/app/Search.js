@@ -7,27 +7,21 @@ import { getAuth, signOut } from "firebase/auth";
 import AddContact from "./components/AddContact";
 
 function Search({ onSelect, selected }) {
-    console.log(selected);
     const { contacts } = useChat();
     const searchUser = useRef(null);
     const [showAddContact, setShowAddContact] = useState(false);
     const [selectedUsername, setSelectedUserName] = useState("");
+    const [menuOpen, setMenuOpen] = useState(false); // ✅ sidebar toggle for mobile
 
     const handleSearch = (e) => {
         e.preventDefault();
-        console.log(contacts)
-        console.log(searchUser.current.value)
         const userInput = searchUser.current.value.trim();
-        console.log(userInput)
         const found = contacts.find(
             (p) => p.displayName.toLowerCase() === userInput.toLowerCase()
         );
-        console.log(found)
 
         if (found) {
-            console.log(found.displayName)
             setSelectedUserName(found.displayName);
-            console.log(selectedUsername)
         } else {
             alert("User not found!");
         }
@@ -50,14 +44,13 @@ function Search({ onSelect, selected }) {
             {/* Logo / Reset Chat */}
             <h1
                 onClick={() => onSelect(null)}
-                // onClick={() => setSelectedUserName(null)}
                 className="text-3xl font-semibold text-white cursor-pointer"
             >
                 Wassup
             </h1>
 
-            {/* Search Box */}
-            <div className="flex items-center justify-center shadow-md">
+            {/* Search Box - hidden on mobile */}
+            <div className="hidden md:flex items-center justify-center shadow-md">
                 <form className="flex items-center" onSubmit={handleSearch}>
                     <FaSearch className="text-white text-xl mr-3" />
                     <input
@@ -74,8 +67,6 @@ function Search({ onSelect, selected }) {
                     >
                         Search
                     </button>
-
-                    {/* Logout Button */}
                     <button
                         type="button"
                         onClick={handleLogout}
@@ -86,7 +77,7 @@ function Search({ onSelect, selected }) {
                 </form>
             </div>
 
-            {/* Icons: Add Contact + Menu */}
+            {/* Icons */}
             <div className="flex items-center space-x-4">
                 <button
                     onClick={() => setShowAddContact(!showAddContact)}
@@ -94,9 +85,44 @@ function Search({ onSelect, selected }) {
                 >
                     <FaUserPlus className="text-white text-2xl" />
                 </button>
+
+                {/* Hamburger menu for mobile */}
+                <button
+                    onClick={() => setMenuOpen(!menuOpen)}
+                    className="md:hidden cursor-pointer"
+                >
+                    <FaBars className="text-white text-2xl" />
+                </button>
             </div>
 
-            {/* Add Contact Modal/Component */}
+            {/* Mobile menu (only visible when toggled) */}
+            {menuOpen && (
+                <div className="absolute top-[70px] left-0 w-full bg-blue-900 p-4 flex flex-col gap-3 md:hidden">
+                    <form onSubmit={handleSearch} className="flex flex-col gap-3">
+                        <input
+                            ref={searchUser}
+                            type="text"
+                            placeholder="Type a name..."
+                            className="w-full py-2 px-3 rounded-md text-gray-900"
+                        />
+                        <button
+                            type="submit"
+                            className="bg-white text-blue-600 py-2 rounded-md"
+                        >
+                            Search
+                        </button>
+                        <button
+                            type="button"
+                            onClick={handleLogout}
+                            className="bg-red-600 text-white py-2 rounded-md"
+                        >
+                            Logout
+                        </button>
+                    </form>
+                </div>
+            )}
+
+            {/* Add Contact */}
             {showAddContact && (
                 <div className="absolute top-[80px] right-4 bg-white shadow-lg p-4 rounded-lg w-[300px]">
                     <AddContact />

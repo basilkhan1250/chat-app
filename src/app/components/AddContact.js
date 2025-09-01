@@ -1,5 +1,4 @@
 "use client";
-
 import { useState } from "react";
 import { collection, query, where, getDocs, doc, setDoc } from "firebase/firestore";
 import { useChat } from "../Context/ContextData";
@@ -12,12 +11,8 @@ const AddContact = () => {
 
     const handleAdd = async () => {
         if (!contactNumber.trim() || !customName.trim() || !currentUser) return;
-
         try {
-            const q = query(
-                collection(db, "users"),
-                where("contactNumber", "==", contactNumber.trim())
-            );
+            const q = query(collection(db, "users"), where("contactNumber", "==", contactNumber.trim()));
             const querySnapshot = await getDocs(q);
 
             if (querySnapshot.empty) {
@@ -33,13 +28,7 @@ const AddContact = () => {
                 return;
             }
 
-            const contactRef = doc(
-                db,
-                "users",
-                currentUser.uid,
-                "contacts",
-                targetData.uid
-            );
+            const contactRef = doc(db, "users", currentUser.uid, "contacts", targetData.uid);
 
             await setDoc(contactRef, {
                 uid: targetData.uid,
@@ -66,7 +55,7 @@ const AddContact = () => {
     };
 
     return (
-        <div className="p-6 bg-gray-100 rounded-lg shadow-md space-y-4">
+        <div className="p-6 bg-gray-100 rounded-lg shadow-md space-y-4 w-full max-w-sm">
             <input
                 type="text"
                 value={contactNumber}

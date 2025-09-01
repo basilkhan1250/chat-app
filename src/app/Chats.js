@@ -16,7 +16,7 @@ import {
 } from "firebase/firestore";
 import { db } from "../../utils/firebaseConfig";
 import Search from "./Search";
-import bgImage from "./assets/bgImageNexts.jpg";
+import bgImage from "./assets/bgImageNext.jpg";
 
 const Chats = () => {
     const { currentUser } = useChat();
@@ -49,14 +49,20 @@ const Chats = () => {
         };
     }, []);
 
+    // ✅ Helper function to safely build chatId
+    const getChatId = (uid1, uid2) => {
+        if (!uid1 || !uid2) return null;
+        return uid1.localeCompare(uid2) < 0
+            ? `${uid1}_${uid2}`
+            : `${uid2}_${uid1}`;
+    };
+
     const sendMessage = async (e) => {
         e.preventDefault();
         if (!newMessage.trim() || !selectedContact || !currentUser) return;
 
-        const chatId =
-            currentUser.uid < selectedContact.id
-                ? `${currentUser.uid}_${selectedContact.id}`
-                : `${selectedContact.id}_${currentUser.uid}`;
+        const chatId = getChatId(currentUser.uid, selectedContact.id);
+        if (!chatId) return; // guard in case IDs are missing
 
         try {
             await addDoc(collection(db, "chats", chatId, "messages"), {
@@ -100,10 +106,8 @@ const Chats = () => {
     useEffect(() => {
         if (!selectedContact || !currentUser) return;
 
-        const chatId =
-            currentUser.uid < selectedContact.id
-                ? `${currentUser.uid}_${selectedContact.id}`
-                : `${selectedContact.id}_${currentUser.uid}`;
+        const chatId = getChatId(currentUser.uid, selectedContact.id);
+        if (!chatId) return;
 
         const q = query(
             collection(db, "chats", chatId, "messages"),
@@ -131,10 +135,7 @@ const Chats = () => {
 
     return (
         <>
-            <Search
-                onSelect={setSelectedContact}
-                selected={selectedContact}
-            />
+            <Search onSelect={setSelectedContact} selected={selectedContact} />
             <div className="fixed top-[70px] right-0 h-[92vh] w-full flex bg-gray-100">
                 {/* Sidebar */}
                 <div
@@ -175,23 +176,30 @@ const Chats = () => {
                     </div>
 
                     {/* Messages */}
-                    <div className="flex-1  p-4 overflow-y-auto"
-                        style={{ backgroundImage: `url(${bgImage.src})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
+                    <div
+                        className="flex-1 p-4 overflow-y-auto"
+                        style={{
+                            backgroundImage: `url(${bgImage.src})`,
+                            backgroundSize: "cover",
+                            backgroundPosition: "center",
+                        }}
                     >
                         {selectedContact &&
                             chatHistories[selectedContact.id]?.map((msg) => (
                                 <div
                                     key={msg.id}
-                                    className={`mb-3 flex ${msg.senderId === currentUser.uid
-                                        ? "justify-end"
-                                        : "justify-start"
-                                        }`}
+                                    className={`mb-3 flex ${
+                                        msg.senderId === currentUser.uid
+                                            ? "justify-end"
+                                            : "justify-start"
+                                    }`}
                                 >
                                     <div
-                                        className={`max-w-xs px-4 py-2 rounded-2xl shadow-md text-sm ${msg.senderId === currentUser.uid
-                                            ? "bg-blue-500 text-white rounded-br-none"
-                                            : "bg-white text-gray-800 border rounded-bl-none"
-                                            }`}
+                                        className={`max-w-xs px-4 py-2 rounded-2xl shadow-md text-sm ${
+                                            msg.senderId === currentUser.uid
+                                                ? "bg-blue-500 text-white rounded-br-none"
+                                                : "bg-white text-gray-800 border rounded-bl-none"
+                                        }`}
                                     >
                                         {msg.text}
                                     </div>
@@ -224,7 +232,7 @@ const Chats = () => {
                         </form>
                     )}
                 </div>
-            </div >
+            </div>
         </>
     );
 };

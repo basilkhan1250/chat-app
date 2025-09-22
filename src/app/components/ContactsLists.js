@@ -39,12 +39,10 @@ const ContactsList = ({ onSelect, selected }) => {
             )}
             <ul className="flex-1 overflow-y-auto">
                 {contacts.map((c) => (
-                    <li
-                        key={c.id}
+                    <li key={c.id}
                         onClick={() => onSelect(c)}
-                        className={`cursor-pointer px-4 py-3 flex flex-col border-b border-gray-700 transition-colors ${
-                            selected?.id === c.id ? "bg-gray-700" : "hover:bg-gray-800"
-                        }`}
+                        className={`cursor-pointer px-4 py-3 flex flex-col border-b border-gray-700 transition-colors ${selected?.id === c.id ? "bg-gray-700" : "hover:bg-gray-800"
+                            }`}
                     >
                         <span className="font-semibold text-white text-sm sm:text-base">
                             {c.displayName || c.userName || "Unnamed Contact"}

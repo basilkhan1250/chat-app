@@ -32,13 +32,13 @@ export default function Auth() {
     };
 
     return (
-        <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-500 via-purple-600 to-pink-500 p-4">
+        <div className="flex items-center justify-center min-h-screen bg-gradient-to-b from-slate-900 to-slate-950 p-4">
             <form
                 onSubmit={handleSubmit}
-                className="bg-white/90 backdrop-blur-lg p-8 rounded-2xl shadow-xl w-full max-w-md"
+                className="w-full max-w-md rounded-2xl border border-slate-800 bg-slate-900/90 backdrop-blur p-6 sm:p-8 shadow"
             >
-                <h2 className="text-3xl font-bold mb-6 text-center text-gray-800">
-                    {isLogin ? "Welcome Back" : "Create Account"}
+                <h2 className="text-2xl sm:text-3xl font-semibold mb-6 text-center text-gray-100">
+                    {isLogin ? "Welcome back" : "Create account"}
                 </h2>
 
                 {!isLogin && (
@@ -49,7 +49,7 @@ export default function Auth() {
                             value={displayName}
                             onChange={(e) => setDisplayName(e.target.value)}
                             required
-                            className="w-full mb-4 p-3 border rounded-lg focus:ring focus:ring-blue-400"
+                            className="w-full mb-4 p-3 rounded-xl border border-slate-800 bg-slate-800/60 text-gray-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/40"
                         />
                         <input
                             type="text"
@@ -57,7 +57,7 @@ export default function Auth() {
                             value={contact}
                             onChange={(e) => setContact(e.target.value)}
                             required
-                            className="w-full mb-4 p-3 border rounded-lg focus:ring focus:ring-blue-400"
+                            className="w-full mb-4 p-3 rounded-xl border border-slate-800 bg-slate-800/60 text-gray-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/40"
                         />
                     </>
                 )}
@@ -68,7 +68,7 @@ export default function Auth() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    className="w-full mb-4 p-3 border rounded-lg focus:ring focus:ring-blue-400"
+                    className="w-full mb-4 p-3 rounded-xl border border-slate-800 bg-slate-800/60 text-gray-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/40"
                 />
 
                 <input
@@ -77,21 +77,21 @@ export default function Auth() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
-                    className="w-full mb-6 p-3 border rounded-lg focus:ring focus:ring-blue-400"
+                    className="w-full mb-6 p-3 rounded-xl border border-slate-800 bg-slate-800/60 text-gray-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/40"
                 />
 
                 <button
                     type="submit"
-                    className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-3 rounded-lg shadow hover:opacity-90 transition"
+                    className="w-full px-5 py-3 bg-blue-600 text-white rounded-full shadow hover:bg-blue-500 transition cursor-pointer"
                 >
                     {isLogin ? "Login" : "Sign Up"}
                 </button>
 
-                <p className="mt-6 text-center text-gray-600 text-sm sm:text-base">
+                <p className="mt-6 text-center text-slate-300 text-sm sm:text-base">
                     {isLogin ? "Don’t have an account?" : "Already have an account?"}{" "}
                     <button
                         type="button"
-                        className="text-blue-600 font-semibold cursor-pointer underline"
+                        className="text-blue-400 font-semibold cursor-pointer hover:text-blue-300"
                         onClick={() => setIsLogin(!isLogin)}
                     >
                         {isLogin ? "Sign Up" : "Login"}

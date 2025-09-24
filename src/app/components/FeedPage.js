@@ -1,6 +1,6 @@
 import Chats from "../Chats";
 import Search from "../Search";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { addDoc, collection, onSnapshot, orderBy, query, serverTimestamp, doc, updateDoc, deleteDoc } from "firebase/firestore";
 import { db } from "../../../utils/firebaseConfig";
 import { useChat } from "../Context/ContextData";
@@ -105,6 +105,16 @@ const FeedPage = ({ onOpenChats, onOpenProfile }) => {
         }
     };
 
+    const contactNameByUid = useMemo(() => {
+        const map = new Map();
+        (contacts || []).forEach((c) => {
+            const uid = c.uid || c.id;
+            if (!uid) return;
+            map.set(uid, c.displayName || c.userName || "Contact");
+        });
+        return map;
+    }, [contacts]);
+
 
 
     return (
@@ -147,6 +157,12 @@ const FeedPage = ({ onOpenChats, onOpenProfile }) => {
                     ) : (
                         posts.map((item) => (
                             <div className="p-4 sm:p-5 rounded-xl bg-slate-900/90 border border-slate-800 shadow" key={`${item.ownerId}-${item.id}`}>
+                                <div className="mb-2 flex items-center gap-3 text-sm text-slate-300">
+                                    <div className="w-8 h-8 rounded-full bg-slate-800 border border-slate-700" />
+                                    <span className="font-medium text-slate-200">
+                                        {contactNameByUid.get(item.ownerId) || "Contact"}
+                                    </span>
+                                </div>
                                 {editingPost && editingPost.id === item.id && editingPost.ownerId === item.ownerId ? (
                                     <div className="space-y-3">
                                         <textarea

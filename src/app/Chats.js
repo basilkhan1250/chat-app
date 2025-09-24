@@ -1,7 +1,6 @@
 "use client";
 import Image from "next/image";
 import React, { useState, useRef, useEffect } from "react";
-import pfp from "@/app/assets/basil.jpeg";
 import ContactsList from "./components/ContactsLists";
 import { useChat } from "./Context/ContextData";
 import {
@@ -204,13 +203,12 @@ const Chats = ({ onClose }) => {
                   ←
                 </button>
               )}
-              <Image
-                src={pfp}
-                alt="Profile"
-                width={40}
-                height={40}
-                className="rounded-full border"
-              />
+              {selectedContact?.photoURL ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={selectedContact.photoURL} alt="Profile" width={40} height={40} className="rounded-full border object-cover" />
+              ) : (
+                <div className="w-10 h-10 rounded-full bg-gray-700 border" />
+              )}
               <h2 className="text-lg font-semibold text-gray-100">
                 {selectedContact?.displayName ||
                   selectedContact?.userName ||

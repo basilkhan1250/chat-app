@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useState } from "react";
 import { onAuthStateChanged } from "firebase/auth";
-import { getDocs, collection, doc, getDoc } from "firebase/firestore";
+import { getDocs, collection, doc, getDoc, onSnapshot } from "firebase/firestore";
 import { auth, db } from "../../../utils/firebaseConfig";
 
 const ChatContext = createContext();
@@ -16,15 +16,16 @@ export const ChatContextProvider = ({ children }) => {
         const unsub = onAuthStateChanged(auth, async (user) => {
             if (user) {
                 try {
-                    // ✅ Fetch Firestore user data
-                    const userDoc = await getDoc(doc(db, "users", user.uid));
-                    let userData = { uid: user.uid, email: user.email, displayName: user.displayName };
-
-                    if (userDoc.exists()) {
-                        userData = { ...userData, ...userDoc.data() };
-                    }
-
-                    setCurrentUser(userData);
+                    // ✅ Realtime Firestore user data (includes photoURL)
+                    const userRef = doc(db, "users", user.uid);
+                    const stopUserSnap = onSnapshot(userRef, (snap) => {
+                        const base = { uid: user.uid, email: user.email, displayName: user.displayName };
+                        if (snap.exists()) {
+                            setCurrentUser({ ...base, ...snap.data() });
+                        } else {
+                            setCurrentUser(base);
+                        }
+                    });
 
                     // ✅ Load contacts
                     const snapshot = await getDocs(collection(db, "users", user.uid, "contacts"));

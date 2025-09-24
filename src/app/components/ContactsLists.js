@@ -41,17 +41,25 @@ const ContactsList = ({ onSelect, selected }) => {
                 {contacts.map((c) => (
                     <li key={c.id}
                         onClick={() => onSelect(c)}
-                        className={`cursor-pointer px-4 py-3 flex flex-col border-b border-gray-700 transition-colors ${selected?.id === c.id ? "bg-gray-700" : "hover:bg-gray-800"
+                        className={`cursor-pointer px-4 py-3 flex items-center gap-3 border-b border-gray-700 transition-colors ${selected?.id === c.id ? "bg-gray-700" : "hover:bg-gray-800"
                             }`}
                     >
-                        <span className="font-semibold text-white text-sm sm:text-base">
-                            {c.displayName || c.userName || "Unnamed Contact"}
-                        </span>
-                        {c.lastMessage && (
-                            <span className="text-xs sm:text-sm text-gray-400 truncate">
-                                {c.lastMessage}
-                            </span>
+                        {c.photoURL ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img src={c.photoURL} alt="avatar" className="w-8 h-8 rounded-full object-cover border" />
+                        ) : (
+                            <div className="w-8 h-8 rounded-full bg-gray-700 border" />
                         )}
+                        <div className="flex-1 min-w-0">
+                            <span className="font-semibold text-white text-sm sm:text-base block truncate">
+                                {c.displayName || c.userName || "Unnamed Contact"}
+                            </span>
+                            {c.lastMessage && (
+                                <span className="text-xs sm:text-sm text-gray-400 truncate block">
+                                    {c.lastMessage}
+                                </span>
+                            )}
+                        </div>
                     </li>
                 ))}
             </ul>

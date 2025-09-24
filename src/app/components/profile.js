@@ -2,8 +2,9 @@
 
 import Search from "../Search";
 import { useEffect, useState } from "react";
-import { collection, onSnapshot, orderBy, query, updateDoc, deleteDoc, doc } from "firebase/firestore";
-import { db } from "../../../utils/firebaseConfig";
+import { collection, onSnapshot, orderBy, query, updateDoc, deleteDoc, doc, setDoc } from "firebase/firestore";
+import { db, storage } from "../../../utils/firebaseConfig";
+import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { useChat } from "../Context/ContextData";
 
 const profile = ({ onOpenFeed, onOpenChats }) => {
@@ -11,6 +12,14 @@ const profile = ({ onOpenFeed, onOpenChats }) => {
     const [posts, setPosts] = useState([]);
     const [editingPost, setEditingPost] = useState(null);
     const [editText, setEditText] = useState("");
+    const [avatarFile, setAvatarFile] = useState(null);
+    const [avatarUploading, setAvatarUploading] = useState(false);
+    const [avatarProgress, setAvatarProgress] = useState(0);
+    const [photoURL, setPhotoURL] = useState(currentUser?.photoURL || "");
+
+    useEffect(() => {
+        setPhotoURL(currentUser?.photoURL || "");
+    }, [currentUser?.photoURL]);
 
 
     useEffect(() => {
@@ -43,6 +52,63 @@ const profile = ({ onOpenFeed, onOpenChats }) => {
                     </div>
                 </div>
                 <div className="max-w-4xl mx-auto p-4 sm:p-6 rounded-b-xl bg-gradient-to-b from-slate-900 to-slate-950">
+                {/* Avatar upload */}
+                <div className="mt-2 mb-4 rounded-xl border border-slate-800 bg-slate-900 p-4 sm:p-5 max-w-2xl mx-auto">
+                    <h2 className="text-lg font-semibold mb-3">Profile Photo</h2>
+                    <div className="flex items-center gap-4">
+                        <div className="w-16 h-16 rounded-full overflow-hidden border border-slate-700 bg-slate-800 flex items-center justify-center text-slate-300">
+                            {photoURL ? (
+                                // eslint-disable-next-line @next/next/no-img-element
+                                <img src={photoURL} alt="avatar" className="w-full h-full object-cover" />
+                            ) : (
+                                <span className="text-sm">No photo</span>
+                            )}
+                        </div>
+                        <div className="flex-1 flex flex-col sm:flex-row gap-3">
+                            <input
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) => setAvatarFile(e.target.files?.[0] || null)}
+                                className="flex-1 text-sm text-slate-300 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-slate-800 file:text-slate-100 hover:file:bg-slate-700"
+                            />
+                            <button
+                                disabled={!avatarFile || avatarUploading}
+                                onClick={() => {
+                                    if (!currentUser || !avatarFile) return;
+                                    setAvatarUploading(true);
+                                    setAvatarProgress(0);
+                                    const objectRef = ref(storage, `avatars/${currentUser.uid}/${Date.now()}_${avatarFile.name}`);
+                                    const task = uploadBytesResumable(objectRef, avatarFile);
+                                    task.on("state_changed",
+                                        (snap) => {
+                                            const pct = Math.round((snap.bytesTransferred / snap.totalBytes) * 100);
+                                            setAvatarProgress(pct);
+                                        },
+                                        (error) => {
+                                            console.error("Avatar upload failed:", error);
+                                            setAvatarUploading(false);
+                                        },
+                                        async () => {
+                                            try {
+                                                const url = await getDownloadURL(objectRef);
+                                                await setDoc(doc(db, "users", currentUser.uid), { photoURL: url }, { merge: true });
+                                                setPhotoURL(url);
+                                                setAvatarFile(null);
+                                            } catch (e) {
+                                                console.error("Failed to save avatar URL:", e);
+                                            } finally {
+                                                setAvatarUploading(false);
+                                            }
+                                        }
+                                    );
+                                }}
+                                className={`px-4 py-2 rounded-full ${avatarUploading ? "bg-slate-700 text-slate-300" : "bg-blue-600 text-white hover:bg-blue-500"} transition`}
+                            >
+                                {avatarUploading ? `Uploading ${avatarProgress}%` : "Upload"}
+                            </button>
+                        </div>
+                    </div>
+                </div>
                 <div className="mt-2 rounded-xl border border-slate-800 shadow bg-slate-900 text-gray-100 p-4 sm:p-5 max-w-2xl mx-auto">
                     <h2 className="text-xl font-semibold mb-2">My Posts</h2>
                     {posts.length === 0 ? (

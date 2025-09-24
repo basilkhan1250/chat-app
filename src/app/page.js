@@ -22,7 +22,7 @@ export default function Home() {
   }
 
   return (
-    <div className="w-full h-screen bg-gray-100">
+    <div className="w-full min-h-screen bg-gray-900 text-gray-100">
       {showProfile ? (
         <Profile onOpenFeed={() => setShowProfile(false)} onOpenChats={() => { setShowProfile(false); setShowChats(true); }} />
       ) : showChats ? (
